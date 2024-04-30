@@ -9,9 +9,9 @@ DB_USER = 'postgres'
 DB_PASSWORD = 'postgres'
 
 # Function to decrypt data using GPG and private key file
-def decrypt_data(data, private_key_path):
-    process = subprocess.Popen(['gpg', '--decrypt', '--batch', '--quiet', '--pinentry-mode', 'loopback', '--passphrase-file', 'kk.txt'], 
-                               stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def decrypt_data(data):
+    process = subprocess.Popen(['gpg', '--decrypt', '--batch', '--quiet', '--pinentry-mode', 'loopback', '--passphrase-file', 'passphrase.txt'], 
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     decrypted_data, _ = process.communicate(input=data)
     return decrypted_data
 
@@ -33,7 +33,7 @@ def get_encrypted_data():
 
 # Decrypt encrypted data
 # Decrypt encrypted data
-def decrypt_rows(rows, private_key_path):
+def decrypt_rows(rows):
     decrypted_rows = []
     for row in rows:
         bytea_data = row[0]  # Get bytea data from the row
@@ -41,7 +41,7 @@ def decrypt_rows(rows, private_key_path):
         encrypted_data = bytes(bytea_data)
         # Decrypt the byte string
         try:
-            decrypted_data = decrypt_data(encrypted_data, private_key_path)
+            decrypted_data = decrypt_data(encrypted_data)
             decrypted_rows.append(decrypted_data.decode('utf-8'))
         except Exception as e:
             print(f"Error decrypting data: {e}")
@@ -51,9 +51,8 @@ def decrypt_rows(rows, private_key_path):
 
 # Open the private key file in binary mode
 def main():
-    private_key_path = "./keys/private.key"  # Update with the path to your private key file
     encrypted_data_rows = get_encrypted_data()
-    decrypted_data_rows = decrypt_rows(encrypted_data_rows, private_key_path)
+    decrypted_data_rows = decrypt_rows(encrypted_data_rows)
     for decrypted_data in decrypted_data_rows:
         print("Decrypted Data:", decrypted_data)
 
