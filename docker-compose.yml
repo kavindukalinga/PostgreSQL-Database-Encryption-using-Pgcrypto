@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  pgdb4:
+    image: postgres
+    container_name: pgdb4
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: testdb
+    ports:
+      - 5436:5432
+    volumes:
+      - pgdb4:/var/lib/postgresql/data
+
+volumes:
+  pgdb4:
+### docker compose up
+## docker exec -it pgdb4 bash
+# psql -n postgres -U postgres
+# \l
+# \c testdb
+# \dt
+### dcoekr compose down

@@ -1,0 +1,8 @@
+#cloud-config
+runcmd:
+  - sudo sed -i -e '/^PasswordAuthentication/s/^.*$/PasswordAuthentication yes/' /etc/ssh/sshd_config
+  - sudo systemctl restart sshd.service  
+  - sudo apt -y  install apache2
+  - sudo apt install net-tools
+  - sudo systemctl start apache2
+  - sudo echo -e "encryption\nencryption" | passwd ubuntu
