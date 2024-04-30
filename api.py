@@ -26,7 +26,7 @@ def get_data():
         password=DB_PASSWORD
     )
     cur = conn.cursor()
-    cur.execute("SELECT customer_id, pgp_pub_decrypt(credit_card, dearmor(%s), 'kalinga') AS decrypted_data FROM public.cc", (PRIVATE_KEY,))
+    cur.execute("SELECT customer_id, pgp_pub_decrypt(credit_card, dearmor(%s), 'yourPassphrase') AS decrypted_data FROM public.cc", (PRIVATE_KEY,))
     rows = cur.fetchall()
     cur.close()
     conn.close()

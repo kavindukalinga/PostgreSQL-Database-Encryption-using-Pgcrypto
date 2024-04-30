@@ -72,7 +72,7 @@ public and secret key created and signed.
 
 pub   rsa3072 2024-04-25 [SC] [expires: 2025-04-25]
       8E5B535902517F681BB8E355ED50ED22D9B57817
-uid                      kalinga (For card) <kavindukalingayu@gmail.com>
+uid                      yourName (For card) <youremail@yomail.com>
 sub   rsa3072 2024-04-25 [E] [expires: 2025-04-25]
 
 root@022dd4a21793:/var/lib/postgresql/data/keys# gpg -a --export 8E5B535902517F681BB8E355ED50ED22D9B57817 > ./public.key
@@ -87,7 +87,7 @@ private.key  public.key
 ```sql
 INSERT INTO cc(customer_id,credit_card) VALUES (4567,pgp_pub_encrypt('333344445555',dearmor(pg_read_file('keys/public.key'))));
 INSERT INTO cc(customer_id,credit_card) VALUES (5678,pgp_pub_encrypt('444455556666',dearmor(pg_read_file('keys/public.key'))));
-SELECT customer_id,credit_card,pgp_pub_decrypt(credit_card,dearmor(pg_read_file('keys/private.key')),'kalinga') AS decrypted_data FROM cc where customer_id in (4567,5678);
+SELECT customer_id,credit_card,pgp_pub_decrypt(credit_card,dearmor(pg_read_file('keys/private.key')),'yourPassphrase') AS decrypted_data FROM cc where customer_id in (4567,5678);
 
 ```
 
@@ -108,7 +108,7 @@ BEGIN
     SELECT
 		id,
         customer_id,
-        pgp_pub_decrypt(credit_card, dearmor(private_key), 'kalinga') AS decrypted_credit_card
+        pgp_pub_decrypt(credit_card, dearmor(private_key), 'yourPassphrase') AS decrypted_credit_card
     FROM
         public.cc;
 END $$;
