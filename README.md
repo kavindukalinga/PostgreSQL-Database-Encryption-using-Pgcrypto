@@ -12,7 +12,7 @@
 - [PostgreSQL Database Encryption using Pgcrypto](#postgresql-database-encryption-using-pgcrypto)
   - [Content](#content)
   - [Database Init](#database-init)
-    - [Useful Docker Commands](#useful-docker-commands)
+    - [Useful Commands](#useful-commands)
   - [Symmetric key Encryption](#symmetric-key-encryption)
     - [PGcrypto init](#pgcrypto-init)
     - [Table init with encrypted column "credit\_card"](#table-init-with-encrypted-column-credit_card)
@@ -38,7 +38,7 @@
 
 ## Database Init
 
-Here using `docke-compose`, the database can be initiated. The configuration is defined in `docker-compose.yml`.
+Here using `docker-compose`, the database can be initiated. The configuration is defined in `docker-compose.yml`.
 
 ```bash
 docker compose up
@@ -46,21 +46,21 @@ docker compose up
 docker compose down
 ```
 
-Then using PGAdmin4 (or similar software), the databse can be viewed and queried.
+Then using PGAdmin4 (or similar software), the database can be viewed and queried.
 
-### Useful Docker Commands
+### Useful Commands
 
 ```bash
 # Exec into container
 docker exec -it pgdb4 bash
 
-# Access Databse
+# Access Database
 psql -n postgres -U postgres
 
 # List databases
 \l
 
-# Change database into testdb
+# Change database to testdb
 \c testdb
 
 # List tables
@@ -197,11 +197,11 @@ SELECT customer_id,credit_card,pgp_pub_decrypt(credit_card,dearmor(pg_read_file(
 
 ## View Data
 
-The private key in server `keys/private.key` should be deleted, otherwise anyone who has access to the server can get the key. But public key `keys/public.key` is always there to encrypt data.
+The private key in server `keys/private.key` should be removed, otherwise anyone who has access to the server can get the key. But public key `keys/public.key` is always there to encrypt data.
 
 ### Without Private.key
 
-Without the prvate.key, the encrypted data can not be decrypted.
+Without the private.key, the encrypted data can not be decrypted.
 
 ```sql
 SELECT * FROM public.cc
@@ -236,25 +236,53 @@ SELECT * FROM decrypted_data;
 ```
 
 ![PgAdmin Decrypted](Img/PgAdmin%20decrypted.png)
-Here with the private key, the decrypted data can be seen.
+Here with the private.key, the decrypted data can be seen.
 
 ## Access Data
 
-When accessing and viewing data using the `private.key`, the main issue is that anyone who has access to the server can inspect logs (/postgres logs) and get the key from the logs (When someone query using `private.key`, the logs has the query and query contains the key)  
+When accessing and viewing data using the `private.key`, the main issue is that anyone who has access to the server can inspect logs (/postgres logs) and get the key from the logs (When someone query using `private.key`, the logs record the query and query contains the key)  
 
-> For more clarifications, go view the [Logs](#logs)  
+> For more clarifications, go view the [View Logs](#view-logs)
 
 ### API with private key
 
-Using `api.py`
+Here `api.py` is written using Flask and can be accessed using `localhost:5000`.
+
+```bash
+python3 api.py
+```
+
+> In the API, first it reads the `private.key` and using that, it query the database and get the decrypted data directly.
+> Therefore the data is decrypted inside the database server.
+> The logs record the query and query contains the `private.key`
 
 ![API to Access Data](Img/Access%20Using%20api.png)
 
+In the API, using `/store_data/<int:customer_id>/<string:credit_card>` , data can be stored in the database and using `/get-data`, data can be viewed.
+
 ### Get data and decrypt locally
 
-Using `decrypt-data.py`
+Here what `decrypt-data.py` does is just query the encrypted data into the local machine and then the encrypted data is decrypted using the `private.key` locally.
+
+```bash
+python3 decrypt-data.py
+```
+
+> Here in this script, first load the encrypted data and the data is decrypted locally. Not in the database server.
+> The logs do not record any sensitive data like `private.key`
+
+But first the `private.key` should be configured using `GnuPG` in the local machine.
+
+```bash
+sudo apt update && sudo apt upgrade gnupg
+gpg --import ./keys/private.key 
+```
 
 ![API to Access Data](Img/Access%20data%20using%20decrypt-data.png)
+
+Here in this example,
+- First it can not decrypt data without the `passphrase`
+- After adding the `passphrase`, now the script can decrypt the data without an issue.
 
 ## Logs
 
